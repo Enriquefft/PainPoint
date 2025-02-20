@@ -117,6 +117,7 @@ dependencies = [
     { name = "python-multipart" },
     { name = "sqlalchemy" },
     { name = "twilio" },
+    { name = "uvicorn" },
 ]
 
 [package.dev-dependencies]
@@ -134,6 +135,7 @@ requires-dist = [
     { name = "python-multipart", specifier = ">=0.0.20" },
     { name = "sqlalchemy", specifier = ">=2.0.38" },
     { name = "twilio", specifier = ">=9.4.5" },
+    { name = "uvicorn", specifier = ">=0.34.0" },
 ]
 
 [package.metadata.requires-dev]

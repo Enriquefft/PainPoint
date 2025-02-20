@@ -1,0 +1,28 @@
+commit-msg:
+  scripts:
+    "commitlint.sh":
+      runner: bash
+
+pre-push:
+  parallel: true
+  commands:
+    lint:
+      run: ruff check --fix
+    types:
+      run: uv run pyright
+    test:
+      priority: 2
+      run: uv run pytest
+
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob: "*.py"
+      run: ruff check --fix {staged_files}
+    types:
+      glob: "*.py"
+      run: uv run pyright {staged_files}
+    formatting:
+      glob: "*.py"
+      run: ruff format {staged_files}

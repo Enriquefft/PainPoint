@@ -21,10 +21,12 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
+
 @app.get("/health")
 async def health() -> dict[str, str]:
     """Health check endpoint."""
     return {"msg": "up & running"}
+
 
 # Dependency for DB connection
 def get_db() -> Generator[Session, None, None]:
@@ -75,13 +77,9 @@ async def reply(
         logger.error("Failed to get a response from the chat system")
         return ""
 
-    conversation_data = {
-        "user": Body,
-        "bot": chat_response
-    }
+    conversation_data = {"user": Body, "bot": chat_response}
     session = ConversationSession(
-        user_id=user.id,
-        conversation_history=json.dumps(conversation_data)
+        user_id=user.id, conversation_history=json.dumps(conversation_data)
     )
     db.add(session)
     db.commit()
@@ -103,8 +101,6 @@ async def register_user(body: str, phone_number: str, db: Session) -> str:
             name=name.strip(),
             phone_number=phone_number,
             target_user_persona=user_description.strip(),
-
-
         )
         db.add(user)
         db.commit()

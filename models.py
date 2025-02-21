@@ -13,7 +13,13 @@ from sqlalchemy import (
     create_engine,
 )
 from sqlalchemy.engine import URL
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    mapped_column,
+    sessionmaker,
+    Mapped,
+    relationship,
+)
 from sqlalchemy.schema import CreateSchema
 
 from env import PG_DATABASE, PG_HOST, PG_PASSWORD, PG_PORT, PG_USER, PROJECT_NAME
@@ -30,28 +36,39 @@ db_url = URL.create(
 engine = create_engine(db_url, pool_pre_ping=True, pool_recycle=300)
 SessionLocal = sessionmaker(bind=engine)
 
-Base = declarative_base(metadata=MetaData(schema=PROJECT_NAME))
+
+class Base(DeclarativeBase):
+    metadata = MetaData(schema=PROJECT_NAME)
+
+
+class ActiveConversation(Base):
+    __tablename__ = "active_conversations"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    users: Mapped["User"] = relationship(back_populates="active_conversations")
+    interview: Mapped[str] = mapped_column(String())
+    feedback: Mapped[str] = mapped_column(String())
 
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    phone_number = Column(String, unique=True, index=True)
-    name = Column(String)
-    target_user_persona = Column(String)
-    sessions = relationship("ConversationSession", back_populates="user")
-
-
-class ConversationSession(Base):
-    __tablename__ = "conversation_sessions"
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    conversation_history = Column(Text)  # JSON string storing conversation data
-    created_at = Column(DateTime, default=datetime.datetime.now)
-    updated_at = Column(
-        DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now
+    id = mapped_column(Integer, index=True, primary_key=True)
+    phone_number = mapped_column(String(15), unique=True)
+    name = mapped_column(String(50), nullable=False)
+    target_user_persona: Mapped[str] = mapped_column(String(), nullable=False)
+    active_conversation_id = mapped_column(ForeignKey(ActiveConversation.id))
+    active_conversations: Mapped["ActiveConversation"] = relationship(
+        back_populates="users"
     )
-    user = relationship("User", back_populates="sessions")
+    previous_conversations: Mapped[list["PreviousConversation"]] = relationship()
+
+
+class PreviousConversation(Base):
+    __tablename__ = "previous_conversations"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
+    interview = Column(Text)
+    feedback = Column(Text)
+    created_at = Column(DateTime, default=datetime.datetime.now)
 
 
 with engine.connect() as connection:

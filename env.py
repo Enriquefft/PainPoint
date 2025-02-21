@@ -31,3 +31,5 @@ TWILIO_AUTH_TOKEN = get_required_env("TWILIO_AUTH_TOKEN")
 TWILIO_NUMBER = get_required_env("TWILIO_NUMBER")
 
 OPENAI_API_KEY = get_required_env("OPENAI_API_KEY")
+DEEPSEEK_API_KEY = get_required_env("DEEPSEEK_API_KEY")
+GEMINI_API_KEY = get_required_env("GEMINI_API_KEY")
